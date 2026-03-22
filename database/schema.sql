@@ -26,11 +26,18 @@ CREATE TABLE IF NOT EXISTS documents (
 CREATE INDEX IF NOT EXISTS ix_documents_user_id ON documents (user_id);
 
 CREATE TABLE IF NOT EXISTS chats (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id    UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    question   TEXT NOT NULL,
-    answer     TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id     UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    session_id  UUID NOT NULL,
+    role        VARCHAR(32) NOT NULL,
+    message     TEXT NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS ix_chats_user_id ON chats (user_id);
+CREATE INDEX IF NOT EXISTS ix_chats_session_id ON chats (session_id);
+CREATE INDEX IF NOT EXISTS ix_chats_session_created ON chats (session_id, created_at);
+
+-- Legacy migration (question/answer rows → new shape requires new table or manual data move):
+-- DROP TABLE IF EXISTS chats CASCADE;
+-- then re-run CREATE TABLE chats above;

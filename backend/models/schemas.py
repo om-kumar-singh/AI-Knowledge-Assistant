@@ -30,9 +30,13 @@ class UploadSuccessResponse(BaseModel):
 
 class QueryRequest(BaseModel):
     query: str = Field(..., min_length=1, description="Natural language query for retrieval.")
+    session_id: str | None = Field(
+        default=None,
+        description="Existing chat session UUID. Omit to start a new session.",
+    )
 
 
 class QueryResponse(BaseModel):
-    query: str
+    session_id: str
     answer: str
     sources: list[str]

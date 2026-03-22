@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     llm_model_name: str = "google/flan-t5-base"
     llm_max_new_tokens: int = 200
     llm_max_context_chars: int = 2000
+    llm_max_history_chars: int = 1500
+    chat_history_limit: int = 10
 
 
 @lru_cache

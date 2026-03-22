@@ -1,19 +1,16 @@
 """Document upload / ingestion routes."""
 
 import logging
-import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from db.session import get_db
 from models.document import Document
 from models.schemas import UploadSuccessResponse
-from models.user import User
 from rag.ingest import ingest_document
-from services import file_service
+from services import chat_service, file_service
 
 logger = logging.getLogger(__name__)
 
@@ -28,20 +25,6 @@ def _ingest_uploaded_file(relative_path: str, document_id: str) -> None:
     except Exception:
         logger.exception("RAG ingestion failed for document_id=%s path=%s", document_id, relative_path)
 
-_DUMMY_UPLOAD_EMAIL = "dummy-upload@local.internal"
-
-
-def _get_or_create_dummy_user_id(db: Session) -> uuid.UUID:
-    user = db.scalars(select(User).where(User.email == _DUMMY_UPLOAD_EMAIL)).first()
-    if user is not None:
-        return user.id
-    user = User(email=_DUMMY_UPLOAD_EMAIL, password_hash="n/a")
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user.id
-
-
 @router.post("/upload", response_model=UploadSuccessResponse)
 async def upload_file(
     background_tasks: BackgroundTasks,
@@ -54,7 +37,7 @@ async def upload_file(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    user_id = _get_or_create_dummy_user_id(db)
+    user_id = chat_service.get_or_create_default_user_id(db)
     document = Document(
         user_id=user_id,
         filename=display_filename,
