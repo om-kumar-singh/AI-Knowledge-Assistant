@@ -55,3 +55,7 @@ crash.*.log
 # --- Misc ---
 coverage/
 *.log
+
+# Local uploads (keep directory via .gitkeep)
+backend/uploads/*
+!backend/uploads/.gitkeep

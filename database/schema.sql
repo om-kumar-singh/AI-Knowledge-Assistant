@@ -1,30 +1,36 @@
--- AI Knowledge Assistant — baseline schema (extend as features are added)
+-- AI Knowledge Assistant — PostgreSQL schema (SQLAlchemy ORM mirrors these tables)
 -- Compatible with PostgreSQL 14+
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Example: future user/session boundaries (placeholder)
-CREATE TABLE IF NOT EXISTS app_meta (
-    key   TEXT PRIMARY KEY,
-    value TEXT NOT NULL,
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS users (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email         VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Example: document store for RAG (placeholder — no business logic yet)
+CREATE INDEX IF NOT EXISTS ix_users_email ON users (email);
+
 CREATE TABLE IF NOT EXISTS documents (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title       TEXT,
-    source_uri  TEXT,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    filename   VARCHAR(512) NOT NULL,
+    file_path  VARCHAR(2048) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS document_chunks (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    document_id  UUID NOT NULL REFERENCES documents (id) ON DELETE CASCADE,
-    chunk_index  INTEGER NOT NULL,
-    content      TEXT NOT NULL,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (document_id, chunk_index)
+-- If upgrading from an older schema:
+-- ALTER TABLE documents RENAME COLUMN s3_url TO file_path;
+
+CREATE INDEX IF NOT EXISTS ix_documents_user_id ON documents (user_id);
+
+CREATE TABLE IF NOT EXISTS chats (
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    question   TEXT NOT NULL,
+    answer     TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_document_chunks_document_id ON document_chunks (document_id);
+CREATE INDEX IF NOT EXISTS ix_chats_user_id ON chats (user_id);
