@@ -26,3 +26,13 @@ class UploadSuccessResponse(BaseModel):
     message: str
     file_path: str
     document_id: str
+
+
+class QueryRequest(BaseModel):
+    query: str = Field(..., min_length=1, description="Natural language query for retrieval.")
+
+
+class QueryResponse(BaseModel):
+    query: str
+    answer: str
+    sources: list[str]

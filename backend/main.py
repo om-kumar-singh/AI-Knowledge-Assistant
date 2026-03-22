@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import get_settings
 from db.session import engine, init_db
-from routes import auth, chat, document, health, test_db
+from rag.ingest import ensure_chroma_directory
+from routes import auth, chat, document, health, query, test_db
 from services import file_service
 
 
@@ -15,6 +16,7 @@ from services import file_service
 async def lifespan(_app: FastAPI):
     settings = get_settings()
     file_service.ensure_upload_directory()
+    ensure_chroma_directory()
     if settings.auto_create_tables:
         init_db()
     yield
@@ -42,6 +44,7 @@ app.include_router(chat.router, prefix=api_prefix)
 app.include_router(document.router, prefix=api_prefix)
 app.include_router(auth.router, prefix=api_prefix)
 app.include_router(test_db.router, prefix=api_prefix)
+app.include_router(query.router, prefix=api_prefix)
 
 
 @app.get("/")

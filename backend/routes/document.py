@@ -1,8 +1,10 @@
 """Document upload / ingestion routes."""
 
+import logging
 import uuid
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,9 +12,21 @@ from db.session import get_db
 from models.document import Document
 from models.schemas import UploadSuccessResponse
 from models.user import User
+from rag.ingest import ingest_document
 from services import file_service
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(tags=["documents"])
+
+_BACKEND_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _ingest_uploaded_file(relative_path: str, document_id: str) -> None:
+    try:
+        ingest_document(_BACKEND_ROOT / relative_path, document_id)
+    except Exception:
+        logger.exception("RAG ingestion failed for document_id=%s path=%s", document_id, relative_path)
 
 _DUMMY_UPLOAD_EMAIL = "dummy-upload@local.internal"
 
@@ -30,6 +44,7 @@ def _get_or_create_dummy_user_id(db: Session) -> uuid.UUID:
 
 @router.post("/upload", response_model=UploadSuccessResponse)
 async def upload_file(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> UploadSuccessResponse:
@@ -48,6 +63,8 @@ async def upload_file(
     db.add(document)
     db.commit()
     db.refresh(document)
+
+    background_tasks.add_task(_ingest_uploaded_file, document.file_path, str(document.id))
 
     return UploadSuccessResponse(
         message="File uploaded successfully",

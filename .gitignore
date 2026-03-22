@@ -59,3 +59,6 @@ coverage/
 # Local uploads (keep directory via .gitkeep)
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Local ChromaDB persistence
+backend/chroma_data/

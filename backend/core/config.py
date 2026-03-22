@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     database_echo: bool = False
     auto_create_tables: bool = False
     uploads_dir: str = "uploads"
+    chroma_persist_dir: str = "chroma_data"
+    embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    rag_default_top_k: int = 5
+    llm_model_name: str = "google/flan-t5-base"
+    llm_max_new_tokens: int = 200
+    llm_max_context_chars: int = 2000
 
 
 @lru_cache

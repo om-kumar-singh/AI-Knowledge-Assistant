@@ -1,1 +1,1 @@
-"""RAG pipeline modules (retrieval, embedding, chunking — to be implemented)."""
+"""RAG: local embeddings (sentence-transformers) + ChromaDB persistence."""
