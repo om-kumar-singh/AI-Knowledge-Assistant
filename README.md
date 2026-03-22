@@ -129,16 +129,6 @@ Copy `backend/.env.example` to `.env`, set `DATABASE_URL`, and apply `database/s
 
 ---
 
-## 📊 Key Highlights (resume / portfolio)
-
-- Built an **end-to-end RAG system** (ingestion, retrieval, generation) on a **FastAPI + Next.js** stack  
-- Implemented **semantic search** with **vector embeddings** and a **persistent ChromaDB** index  
-- Designed a **modular backend**: routes, services, RAG package, SQLAlchemy models, and environment-based config  
-- Integrated **conversational memory** with **session-scoped chat history** stored in PostgreSQL  
-- Ran a **local LLM** (**FLAN-T5**) via **Hugging Face Transformers** — **no paid third-party LLM APIs**  
-
----
-
 ## 🚀 Future Improvements
 
 - **User authentication** and per-user data isolation  
@@ -148,14 +138,6 @@ Copy `backend/.env.example` to `.env`, set `DATABASE_URL`, and apply `database/s
 
 ---
 
-## 📸 Screenshots
-
-| Chat | Upload |
-|------|--------|
-| _Add screenshot: chat tab_ | _Add screenshot: upload tab_ |
-
----
-
 ## 🤝 Contribution / License
 
-Contributions via pull requests are welcome. License is **to be determined** — add a `LICENSE` file when you publish.
+Contributions via pull requests are welcome.
