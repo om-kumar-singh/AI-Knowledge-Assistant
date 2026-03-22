@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     llm_max_context_chars: int = 2000
     llm_max_history_chars: int = 1500
     chat_history_limit: int = 10
+    # Comma-separated browser origins (http://localhost:3000 vs http://127.0.0.1:3000 differ for CORS).
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    def cors_origins_list(self) -> list[str]:
+        parts = [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        return parts if parts else ["http://localhost:3000"]
 
 
 @lru_cache

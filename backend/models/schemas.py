@@ -1,5 +1,7 @@
 """Request/response models shared across routes."""
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -30,7 +32,7 @@ class UploadSuccessResponse(BaseModel):
 
 class QueryRequest(BaseModel):
     query: str = Field(..., min_length=1, description="Natural language query for retrieval.")
-    session_id: str | None = Field(
+    session_id: Optional[str] = Field(
         default=None,
         description="Existing chat session UUID. Omit to start a new session.",
     )

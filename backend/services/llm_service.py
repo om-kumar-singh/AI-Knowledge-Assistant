@@ -75,17 +75,19 @@ def _build_prompt(
 
 def generate_answer(
     query: str,
-    context: list[str],
+    context: list[str] | None,
     *,
     chat_history: Sequence[tuple[str, str]] | None = None,
 ) -> str:
     """
     Build a RAG (+ optional memory) prompt and run FLAN-T5 locally.
+    Pipeline/model loads once via module-level `_get_pipeline()` (not per call).
 
     `chat_history`: chronological (role, message) pairs for prior turns only (not `query`).
     """
     settings = get_settings()
-    parts = [c.strip() for c in context if c and c.strip()]
+    ctx = context if context is not None else []
+    parts = [c.strip() for c in ctx if c is not None and str(c).strip()]
     context_str = "\n\n".join(parts)
     has_history = bool(chat_history)
 
