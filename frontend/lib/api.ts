@@ -4,8 +4,45 @@ export type QueryResponse = {
   sources: string[];
 };
 
+export type UploadResponse = {
+  message: string;
+  file_path: string;
+  document_id: string;
+};
+
 function apiBase(): string {
   return (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000").replace(/\/$/, "");
+}
+
+function errorBodyMessage(text: string): string {
+  try {
+    const j = JSON.parse(text) as { detail?: unknown };
+    if (typeof j.detail === "string") return j.detail;
+    if (Array.isArray(j.detail)) return JSON.stringify(j.detail);
+  } catch {
+    /* plain text */
+  }
+  return text || "Request failed";
+}
+
+/**
+ * POST /api/upload — multipart form field `file` (.pdf / .txt).
+ */
+export async function postUploadFile(file: File): Promise<UploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${apiBase()}/api/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(errorBodyMessage(text) || `Upload failed (${res.status})`);
+  }
+
+  return res.json() as Promise<UploadResponse>;
 }
 
 /**
@@ -26,7 +63,7 @@ export async function postQuery(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `Request failed (${res.status})`);
+    throw new Error(errorBodyMessage(text) || `Request failed (${res.status})`);
   }
 
   return res.json() as Promise<QueryResponse>;

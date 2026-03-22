@@ -4,9 +4,13 @@ import { useCallback, useState } from "react";
 
 import ChatInput from "@/components/ChatInput";
 import ChatWindow, { type ChatMessage } from "@/components/ChatWindow";
+import FileUpload from "@/components/FileUpload";
 import { postQuery } from "@/lib/api";
 
+type Tab = "upload" | "chat";
+
 export default function Home() {
+  const [tab, setTab] = useState<Tab>("chat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,25 +93,57 @@ export default function Home() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="shrink-0 border-b border-zinc-200/90 bg-white/80 px-4 py-3 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+          <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-base font-semibold tracking-tight">AI Knowledge Assistant</h1>
-              <p className="text-xs text-zinc-500 dark:text-zinc-500">Local RAG · Chat</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500">Local RAG · Upload &amp; chat</p>
+            </div>
+            <div className="flex rounded-xl border border-zinc-200/90 bg-zinc-100/80 p-1 dark:border-zinc-800 dark:bg-zinc-900/80">
+              <button
+                type="button"
+                onClick={() => setTab("upload")}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  tab === "upload"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                Upload
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab("chat")}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  tab === "chat"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                Chat
+              </button>
             </div>
           </div>
         </header>
 
-        {error && (
-          <div
-            className="shrink-0 border-b border-red-200/80 bg-red-50 px-4 py-2 text-center text-xs text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
-            role="alert"
-          >
-            {error}
+        {tab === "upload" ? (
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <FileUpload />
           </div>
-        )}
+        ) : (
+          <>
+            {error && (
+              <div
+                className="shrink-0 border-b border-red-200/80 bg-red-50 px-4 py-2 text-center text-xs text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+                role="alert"
+              >
+                {error}
+              </div>
+            )}
 
-        <ChatWindow messages={messages} isLoading={isLoading} />
-        <ChatInput onSend={handleSend} disabled={isLoading} />
+            <ChatWindow messages={messages} isLoading={isLoading} />
+            <ChatInput onSend={handleSend} disabled={isLoading} />
+          </>
+        )}
       </div>
     </div>
   );
